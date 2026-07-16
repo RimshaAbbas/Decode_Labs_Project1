@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="DecodeLabs Project 1 — Responsive vanilla web interface built with semantic HTML5, mobile-first CSS, and pure JavaScript." />
+  <title>DecodeLabs — Project 1</title>
+
+  <!-- Google Fonts: max 2 families -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Playfair+Display:wght@700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- =====================
+       HEADER / NAVIGATION
+  ========================== -->
+  <header class="site-header" role="banner">
+    <nav class="nav-container" aria-label="Primary navigation">
+      <a href="#home" class="logo" aria-label="DecodeLabs home">
+        Decode<span>Labs</span>
+      </a>
+
+      <!-- Hamburger — visible on mobile only -->
+      <button
+        class="menu-toggle"
+        aria-controls="primary-nav"
+        aria-expanded="false"
+        aria-label="Toggle navigation menu"
+      >
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+      </button>
+
+      <ul class="nav-links" id="primary-nav" role="list">
+        <li><a href="#home"      class="nav-link active">Home</a></li>
+        <li><a href="#dashboard" class="nav-link">Dashboard</a></li>
+        <li><a href="#features"  class="nav-link">Features</a></li>
+        <li><a href="#team"      class="nav-link">Team</a></li>
+        <li><a href="#contact"   class="nav-link">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- =====================
+       MAIN CONTENT
+  ========================== -->
+  <main class="main-layout" id="home">
+
+    <!-- HERO -->
+    <section class="hero-section" aria-labelledby="hero-heading">
+      <div class="hero-content">
+        <span class="hero-eyebrow">Industrial Training · 2026</span>
+        <h1 id="hero-heading">
+          Build Interfaces<br />
+          <em>That Actually Work</em>
+        </h1>
+        <p class="hero-sub">
+          A fully responsive, accessible web interface crafted with pure semantic
+          HTML5, mobile-first CSS, and zero external dependencies.
+        </p>
+        <div class="hero-actions">
+          <a href="#dashboard" class="btn btn-primary">View Dashboard</a>
+          <a href="#features"  class="btn btn-ghost">Explore Features</a>
+        </div>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-card-stack">
+          <div class="hero-card hc-1">
+            <span class="hc-label">LCP</span>
+            <span class="hc-value">0.9s</span>
+          </div>
+          <div class="hero-card hc-2">
+            <span class="hc-label">CLS</span>
+            <span class="hc-value">0.00</span>
+          </div>
+          <div class="hero-card hc-3">
+            <span class="hc-label">Score</span>
+            <span class="hc-value">100</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS BAR -->
+    <section class="stats-bar" aria-label="Project statistics">
+      <div class="stat-item">
+        <span class="stat-number" data-target="12">0</span>
+        <span class="stat-label">Components</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" data-target="3">0</span>
+        <span class="stat-label">Breakpoints</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" data-target="0">0</span>
+        <span class="stat-label">Frameworks</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" data-target="100">0</span>
+        <span class="stat-label">Lighthouse Score</span>
+      </div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section class="dashboard-section" id="dashboard" aria-labelledby="dashboard-heading">
+      <div class="section-header">
+        <h2 id="dashboard-heading">Dashboard</h2>
+        <p>Live project metrics and component status at a glance.</p>
+      </div>
+
+      <div class="dashboard-grid">
+
+        <!-- Filter Tabs -->
+        <div class="tab-bar" role="tablist" aria-label="Dashboard filters">
+          <button class="tab-btn active" role="tab" aria-selected="true"  data-filter="all">All</button>
+          <button class="tab-btn"        role="tab" aria-selected="false" data-filter="active">Active</button>
+          <button class="tab-btn"        role="tab" aria-selected="false" data-filter="pending">Pending</button>
+          <button class="tab-btn"        role="tab" aria-selected="false" data-filter="done">Done</button>
+        </div>
+
+        <!-- Cards populated & filtered by JS -->
+        <div class="cards-container" id="cards-container" role="list">
+          <!-- JS renders cards here -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features-section" id="features" aria-labelledby="features-heading">
+      <div class="section-header">
+        <h2 id="features-heading">Core Features</h2>
+        <p>Every requirement met — no shortcuts taken.</p>
+      </div>
+
+      <div class="features-grid">
+        <article class="feature-card">
+          <div class="feature-icon" aria-hidden="true">⚡</div>
+          <h3>Zero Dependencies</h3>
+          <p>No Bootstrap, no jQuery, no Tailwind. Pure HTML, CSS, and JavaScript from scratch.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon" aria-hidden="true">📱</div>
+          <h3>Mobile-First</h3>
+          <p>Designed for small screens first. <code>min-width</code> queries scale up — never <code>max-width</code> down.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon" aria-hidden="true">🎨</div>
+          <h3>Design Tokens</h3>
+          <p>CSS custom properties centralize every color, font, and weight into a single source of truth.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon" aria-hidden="true">♿</div>
+          <h3>Accessible</h3>
+          <p>Semantic HTML5 elements, ARIA roles, focus management, and keyboard navigation throughout.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon" aria-hidden="true">📐</div>
+          <h3>Grid + Flexbox</h3>
+          <p>CSS Grid handles macro layout structure; Flexbox manages micro component alignment.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon" aria-hidden="true">🚀</div>
+          <h3>Performance</h3>
+          <p>Explicit image dimensions, lazy loading, and minimal CLS ensure top Lighthouse scores.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- TEAM -->
+    <section class="team-section" id="team" aria-labelledby="team-heading">
+      <div class="section-header">
+        <h2 id="team-heading">Team</h2>
+        <p>The people behind this project.</p>
+      </div>
+
+      <div class="team-grid">
+        <article class="team-card">
+          <div class="avatar" aria-hidden="true">GA</div>
+          <h3>G. Abbas</h3>
+          <p class="team-role">Frontend Developer</p>
+          <p>Industrial trainee at DecodeLabs, building responsive interfaces with zero frameworks.</p>
+        </article>
+        <article class="team-card">
+          <div class="avatar" aria-hidden="true">DL</div>
+          <h3>DecodeLabs</h3>
+          <p class="team-role">Training Institute</p>
+          <p>Focused on real-world, production-quality web development from first principles.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- CONTACT FORM -->
+    <section class="contact-section" id="contact" aria-labelledby="contact-heading">
+      <div class="section-header">
+        <h2 id="contact-heading">Contact</h2>
+        <p>Send a message — every field is validated in pure JavaScript.</p>
+      </div>
+
+      <form
+        class="contact-form"
+        id="contact-form"
+        novalidate
+        aria-label="Contact form"
+      >
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cf-name">Full Name <span aria-hidden="true">*</span></label>
+            <input
+              type="text"
+              id="cf-name"
+              name="name"
+              placeholder="G. Abbas"
+              autocomplete="name"
+              aria-required="true"
+              aria-describedby="cf-name-error"
+            />
+            <span class="field-error" id="cf-name-error" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="form-group">
+            <label for="cf-email">Email Address <span aria-hidden="true">*</span></label>
+            <input
+              type="email"
+              id="cf-email"
+              name="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+              aria-required="true"
+              aria-describedby="cf-email-error"
+            />
+            <span class="field-error" id="cf-email-error" role="alert" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="cf-subject">Subject <span aria-hidden="true">*</span></label>
+          <input
+            type="text"
+            id="cf-subject"
+            name="subject"
+            placeholder="What is this about?"
+            aria-required="true"
+            aria-describedby="cf-subject-error"
+          />
+          <span class="field-error" id="cf-subject-error" role="alert" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="cf-message">Message <span aria-hidden="true">*</span></label>
+          <textarea
+            id="cf-message"
+            name="message"
+            rows="5"
+            placeholder="Write your message here…"
+            aria-required="true"
+            aria-describedby="cf-message-error cf-char-count"
+          ></textarea>
+          <span class="char-count" id="cf-char-count" aria-live="polite">0 / 500</span>
+          <span class="field-error" id="cf-message-error" role="alert" aria-live="polite"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" id="submit-btn">
+          Send Message
+        </button>
+
+        <div class="form-success" id="form-success" role="status" aria-live="polite" hidden>
+          ✅ Message sent! We'll get back to you shortly.
+        </div>
+      </form>
+    </section>
+
+  </main>
+
+  <!-- =====================
+       FOOTER
+  ========================== -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="logo">Decode<span>Labs</span></span>
+        <p>Industrial Training Programme · 2026</p>
+      </div>
+      <p class="footer-copy">&copy; 2026 DecodeLabs Industrial Training. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
