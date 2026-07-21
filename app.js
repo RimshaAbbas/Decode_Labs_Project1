@@ -712,3 +712,226 @@ function renderCards() {
     if (card) resetTilt(card);
   }, { passive: true });
 })();
+
+
+/* ============================================================
+   8. COMPONENT API BRIDGE
+      Connects the frontend form to the backend REST API.
+      Techniques: fetch(), async/await, JSON.stringify,
+                  DOM manipulation, error handling.
+
+      Backend must be running at http://localhost:3000
+      Start it with:  cd Decode_Labs_P2_Backend && npm run dev
+   ============================================================ */
+(function initComponentAPI() {
+
+  const API_URL    = 'http://localhost:3000/api/components';
+  const form       = document.getElementById('component-form');
+  const submitBtn  = document.getElementById('comp-submit-btn');
+  const successMsg = document.getElementById('comp-success');
+  const errorMsg   = document.getElementById('comp-error');
+  const feedGrid   = document.getElementById('api-cards-container');
+
+  // All four elements must be in the DOM to proceed
+  if (!form || !feedGrid) return;
+
+  // ── Helpers ──────────────────────────────────────────────
+
+  function showError(text) {
+    if (!errorMsg) return;
+    errorMsg.textContent = text;
+    errorMsg.style.display = 'block';
+    errorMsg.style.opacity = '0';
+    requestAnimationFrame(() => {
+      errorMsg.style.transition = 'opacity 0.3s ease';
+      errorMsg.style.opacity = '1';
+    });
+  }
+
+  function hideError() {
+    if (!errorMsg) return;
+    errorMsg.style.display = 'none';
+    errorMsg.textContent = '';
+  }
+
+  function showSuccess() {
+    if (!successMsg) return;
+    successMsg.removeAttribute('hidden');
+    successMsg.style.opacity = '0';
+    requestAnimationFrame(() => {
+      successMsg.style.transition = 'opacity 0.4s ease';
+      successMsg.style.opacity = '1';
+    });
+    setTimeout(() => {
+      successMsg.style.opacity = '0';
+      setTimeout(() => successMsg.setAttribute('hidden', ''), 400);
+    }, 3000);
+  }
+
+  // Accent colour per layout engine — maps to CSS custom property
+  const LAYOUT_ACCENTS = {
+    'CSS Grid':             '#38bdf8',   // cyan
+    'Flexbox':              '#a78bfa',   // violet
+    'CSS Grid + Flexbox':   '#34d399',   // emerald
+    'Absolute Positioning': '#fbbf24',   // amber
+  };
+  const DEFAULT_ACCENT = '#fb7185';      // coral fallback
+
+  // Build a single card DOM element from a component object
+  function buildCard(comp) {
+    const accent = LAYOUT_ACCENTS[comp.layout] || DEFAULT_ACCENT;
+
+    const card = document.createElement('article');
+    card.className = 'api-card';
+    card.setAttribute('role', 'listitem');
+    card.setAttribute('data-id', comp.id);
+    // Wire the CSS variable so ::before bar and hover border use it
+    card.style.setProperty('--api-card-accent', accent);
+
+    // Meta row: layout badge + ID
+    const meta = document.createElement('div');
+    meta.className = 'api-card-meta';
+
+    const layoutBadge = document.createElement('span');
+    layoutBadge.className = 'api-card-layout';
+    // Tint the badge background to match accent
+    layoutBadge.style.background  = `${accent}18`;  // 10% opacity hex
+    layoutBadge.style.color        = accent;
+    layoutBadge.textContent        = comp.layout;
+
+    const idSpan = document.createElement('span');
+    idSpan.className = 'api-card-id';
+    idSpan.textContent = `#${comp.id}`;
+
+    meta.appendChild(layoutBadge);
+    meta.appendChild(idSpan);
+
+    // Title
+    const title = document.createElement('div');
+    title.className = 'api-card-title';
+    title.textContent = comp.title;   // textContent = XSS-safe
+
+    // Purpose
+    const purpose = document.createElement('div');
+    purpose.className = 'api-card-purpose';
+    purpose.textContent = comp.purpose;
+
+    card.appendChild(meta);
+    card.appendChild(title);
+    card.appendChild(purpose);
+
+    return card;
+  }
+
+  // ── 1. Fetch & Render ──────────────────────────────────────
+  // Pulls the full components array from the backend and rebuilds
+  // the #api-cards-container DOM each time it's called.
+
+  async function fetchAndRenderComponents() {
+    try {
+      const response = await fetch(API_URL);
+
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}`);
+      }
+
+      const components = await response.json(); // plain array from the API
+
+      feedGrid.innerHTML = ''; // clear previous state
+
+      if (components.length === 0) {
+        feedGrid.innerHTML = `
+          <div class="api-empty">
+            <div class="api-empty-icon">📭</div>
+            <p>No components in server state yet.</p>
+            <p style="margin-top:0.4rem; font-size:0.8rem;">Submit the form above to transmit the first one.</p>
+          </div>`;
+        return;
+      }
+
+      components.forEach((comp, index) => {
+        const card = buildCard(comp);
+        // Staggered entrance animation matching the dashboard section style
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(16px)';
+        card.style.transition = `opacity 0.4s ease ${index * 80}ms, transform 0.4s ease ${index * 80}ms`;
+        feedGrid.appendChild(card);
+
+        // Trigger animation on next frame
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+          });
+        });
+      });
+
+    } catch (err) {
+      console.error('Synaptic link broken — could not reach backend:', err);
+      feedGrid.innerHTML = `
+        <div class="api-error">
+          <span style="font-size:1.4rem">⚠</span>
+          <span>Failed to reach backend server. Make sure it is running at
+          <code style="background:rgba(251,113,133,0.15);color:inherit;padding:1px 5px;border-radius:3px;">http://localhost:3000</code></span>
+        </div>`;
+    }
+  }
+
+  // ── 2. Form Submission → POST ──────────────────────────────
+  // Collects form values, sends a JSON payload to POST /api/components,
+  // handles the Gatekeeper rejection (400) and success (201).
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideError();
+
+    const payload = {
+      title:   document.getElementById('compTitle').value.trim(),
+      purpose: document.getElementById('compDesc').value.trim(),
+      layout:  document.getElementById('compLayout').value
+    };
+
+    // Client-side pre-check mirrors the Gatekeeper so we give instant feedback
+    if (!payload.title || !payload.purpose || !payload.layout) {
+      showError('All three fields are required before transmission.');
+      return;
+    }
+
+    // Loading state
+    submitBtn.disabled    = true;
+    submitBtn.textContent = 'Transmitting…';
+
+    try {
+      const response = await fetch(API_URL, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        // Gatekeeper rejected the payload — show the server's message
+        const errData = await response.json();
+        showError(`Gatekeeper Rejection: ${errData.message}`);
+        return;
+      }
+
+      // Success — reset the form and refresh the live feed
+      form.reset();
+      showSuccess();
+      fetchAndRenderComponents(); // pull fresh state from the server
+
+    } catch (err) {
+      console.error('Transmission breakdown:', err);
+      showError('Network error — could not reach the backend. Is the server running?');
+    } finally {
+      submitBtn.disabled    = false;
+      submitBtn.textContent = 'Transmit Component';
+    }
+  });
+
+  // ── Initial load ───────────────────────────────────────────
+  // Run immediately on page load so the live feed populates
+  // with whatever the server already holds in its data store.
+  fetchAndRenderComponents();
+
+})();

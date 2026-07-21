@@ -19,6 +19,19 @@
 <body>
 
   <!-- =====================
+       3D BACKGROUND LAYERS
+       (z-index 0–2, below all content)
+  ========================== -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+  <div class="bg-mesh"  aria-hidden="true"></div>
+  <div class="bg-orbs"  aria-hidden="true">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+    <div class="bg-orb bg-orb-4"></div>
+  </div>
+
+  <!-- =====================
        HEADER / NAVIGATION
   ========================== -->
   <header class="site-header" role="banner">
@@ -40,11 +53,12 @@
       </button>
 
       <ul class="nav-links" id="primary-nav" role="list">
-        <li><a href="#home"      class="nav-link active">Home</a></li>
-        <li><a href="#dashboard" class="nav-link">Dashboard</a></li>
-        <li><a href="#features"  class="nav-link">Features</a></li>
-        <li><a href="#team"      class="nav-link">Team</a></li>
-        <li><a href="#contact"   class="nav-link">Contact</a></li>
+        <li><a href="#home"       class="nav-link active">Home</a></li>
+        <li><a href="#dashboard"  class="nav-link">Dashboard</a></li>
+        <li><a href="#features"   class="nav-link">Features</a></li>
+        <li><a href="#components" class="nav-link">Components</a></li>
+        <li><a href="#team"       class="nav-link">Team</a></li>
+        <li><a href="#contact"    class="nav-link">Contact</a></li>
       </ul>
     </nav>
   </header>
@@ -54,38 +68,52 @@
   ========================== -->
   <main class="main-layout" id="home">
 
-    <!-- HERO -->
-    <section class="hero-section" aria-labelledby="hero-heading">
-      <div class="hero-content">
-        <span class="hero-eyebrow">Industrial Training · 2026</span>
-        <h1 id="hero-heading">
-          Build Interfaces<br />
-          <em>That Actually Work</em>
-        </h1>
-        <p class="hero-sub">
-          A fully responsive, accessible web interface crafted with pure semantic
-          HTML5, mobile-first CSS, and zero external dependencies.
-        </p>
-        <div class="hero-actions">
-          <a href="#dashboard" class="btn btn-primary">View Dashboard</a>
-          <a href="#features"  class="btn btn-ghost">Explore Features</a>
-        </div>
-      </div>
-      <div class="hero-visual" aria-hidden="true">
-        <div class="hero-card-stack">
-          <div class="hero-card hc-1">
-            <span class="hc-label">LCP</span>
-            <span class="hc-value">0.9s</span>
-          </div>
-          <div class="hero-card hc-2">
-            <span class="hc-label">CLS</span>
-            <span class="hc-value">0.00</span>
-          </div>
-          <div class="hero-card hc-3">
-            <span class="hc-label">Score</span>
-            <span class="hc-value">100</span>
+    <!-- HERO — metrics fed dynamically via /api/metrics -->
+    <section class="hero-section hero-container" aria-labelledby="hero-heading">
+      <div class="hero-card-layout">
+
+        <!-- Left: text + actions -->
+        <div class="hero-text-side hero-content">
+          <span class="hero-eyebrow">Industrial Training · 2026</span>
+          <h1 id="hero-heading">
+            Build Interfaces<br />
+            <em>That Actually Work</em>
+          </h1>
+          <p class="hero-sub">
+            A fully responsive, accessible web interface crafted with pure semantic
+            HTML5, mobile-first CSS, and zero external dependencies.
+          </p>
+          <div class="hero-actions">
+            <a href="#dashboard" class="btn btn-primary">View Dashboard</a>
+            <a href="#features"  class="btn btn-ghost">Explore Features</a>
           </div>
         </div>
+
+        <!-- Right: live performance metrics (injected by loadServerMetrics()) -->
+        <div class="hero-metrics-side" id="metricsPanel" aria-label="Live performance metrics">
+          <div class="metric-glass-card" data-metric="lcp">
+            <div class="metric-info">
+              <span class="metric-label">LCP</span>
+              <span class="metric-val" id="metricLCP" aria-live="polite">--</span>
+            </div>
+            <div class="metric-bar"><div class="metric-bar-fill" id="lcpBar"></div></div>
+          </div>
+          <div class="metric-glass-card" data-metric="cls">
+            <div class="metric-info">
+              <span class="metric-label">CLS</span>
+              <span class="metric-val" id="metricCLS" aria-live="polite">--</span>
+            </div>
+            <div class="metric-bar"><div class="metric-bar-fill" id="clsBar"></div></div>
+          </div>
+          <div class="metric-glass-card" data-metric="score">
+            <div class="metric-info">
+              <span class="metric-label">Score</span>
+              <span class="metric-val" id="metricScore" aria-live="polite">--</span>
+            </div>
+            <div class="metric-bar"><div class="metric-bar-fill" id="scoreBar"></div></div>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -198,6 +226,78 @@
       </div>
     </section>
 
+    <!-- COMPONENT SUBMISSION — bridges frontend to backend API -->
+    <section class="contact-section" id="components" aria-labelledby="components-heading">
+      <div class="section-header">
+        <h2 id="components-heading">Component Transmitter</h2>
+        <p>Submit a new component — the payload crosses the network void to the backend API.</p>
+      </div>
+
+      <form
+        class="contact-form"
+        id="component-form"
+        novalidate
+        aria-label="Component submission form"
+      >
+        <div class="form-group">
+          <label for="compTitle">Component Title <span aria-hidden="true">*</span></label>
+          <input
+            type="text"
+            id="compTitle"
+            name="compTitle"
+            placeholder="e.g. Sub-Cortical Node"
+            autocomplete="off"
+            aria-required="true"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="compDesc">Purpose <span aria-hidden="true">*</span></label>
+          <input
+            type="text"
+            id="compDesc"
+            name="compDesc"
+            placeholder="e.g. Routing network actions"
+            autocomplete="off"
+            aria-required="true"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="compLayout">Layout Engine <span aria-hidden="true">*</span></label>
+          <select id="compLayout" name="compLayout" aria-required="true">
+            <option value="">— Select a layout —</option>
+            <option value="CSS Grid">CSS Grid</option>
+            <option value="Flexbox">Flexbox</option>
+            <option value="CSS Grid + Flexbox">CSS Grid + Flexbox</option>
+            <option value="Absolute Positioning">Absolute Positioning</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" id="comp-submit-btn">
+          Transmit Component
+        </button>
+
+        <div class="form-success" id="comp-success" role="status" aria-live="polite" hidden>
+          ✅ Component integrated into server state.
+        </div>
+
+        <div id="comp-error" role="alert" aria-live="polite" style="display:none; color:var(--accent-coral, #e07060); padding: 0.75rem 0; font-size: 0.9rem;"></div>
+      </form>
+
+      <!-- Live feed from the backend -->
+      <div class="api-feed-header">
+        <h3>Server State</h3>
+        <span class="live-badge">
+          <span class="live-dot" aria-hidden="true"></span>
+          LIVE
+        </span>
+      </div>
+      <div id="api-cards-container" role="list" style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));">
+        <!-- fetchAndRenderComponents() populates this -->
+      </div>
+    </section>
+
     <!-- CONTACT FORM -->
     <section class="contact-section" id="contact" aria-labelledby="contact-heading">
       <div class="section-header">
@@ -293,5 +393,157 @@
   </footer>
 
   <script src="app.js"></script>
+
+  <!-- 3D Particle Field Engine -->
+  <script>
+  (function initParticleField() {
+    const canvas = document.getElementById('bg-canvas');
+    if (!canvas) return;
+
+    // Honour reduced motion
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      canvas.style.display = 'none';
+      return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    let W, H, particles, animId;
+
+    // Palette matching the dark theme accents
+    const COLORS = ['#38bdf8', '#a78bfa', '#a38a75', '#34d399', '#fbbf24'];
+
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+
+    function createParticles() {
+      // ~1 particle per 9000px² of screen — scales with screen size
+      const count = Math.floor((W * H) / 9000);
+      particles = Array.from({ length: count }, () => ({
+        x:     Math.random() * W,
+        y:     Math.random() * H,
+        z:     Math.random() * 800 + 100,       // depth 100–900
+        vx:    (Math.random() - 0.5) * 0.35,
+        vy:    (Math.random() - 0.5) * 0.35,
+        vz:    (Math.random() - 0.5) * 0.6,
+        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        base:  Math.random() * 1.5 + 0.5,       // base radius
+      }));
+    }
+
+    // Project 3D point onto 2D canvas using simple perspective divide
+    function project(x, y, z) {
+      const fov = 600;
+      const scale = fov / (fov + z);
+      return {
+        px:    (x - W / 2) * scale + W / 2,
+        py:    (y - H / 2) * scale + H / 2,
+        scale: scale,
+      };
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      for (const p of particles) {
+        // Move
+        p.x += p.vx;
+        p.y += p.vy;
+        p.z += p.vz;
+
+        // Wrap around edges
+        if (p.x < 0)   p.x = W;
+        if (p.x > W)   p.x = 0;
+        if (p.y < 0)   p.y = H;
+        if (p.y > H)   p.y = 0;
+        if (p.z < 50)  p.z = 900;
+        if (p.z > 900) p.z = 50;
+
+        const { px, py, scale } = project(p.x, p.y, p.z);
+        const r     = p.base * scale * 2.2;
+        const alpha = scale * 0.75;           // far = transparent, near = opaque
+
+        // Draw glowing dot
+        const grad = ctx.createRadialGradient(px, py, 0, px, py, r * 3.5);
+        grad.addColorStop(0,   p.color + 'cc');
+        grad.addColorStop(0.4, p.color + '44');
+        grad.addColorStop(1,   p.color + '00');
+
+        ctx.globalAlpha = alpha;
+        ctx.beginPath();
+        ctx.arc(px, py, r * 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Crisp bright core
+        ctx.globalAlpha = alpha * 0.9;
+        ctx.beginPath();
+        ctx.arc(px, py, r, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+      }
+
+      // Draw connection lines between nearby particles
+      ctx.globalAlpha = 1;
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const a = particles[i];
+          const b = particles[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 140) {
+            const pa = project(a.x, a.y, a.z);
+            const pb = project(b.x, b.y, b.z);
+            const strength = (1 - dist / 140) * 0.18;
+
+            ctx.beginPath();
+            ctx.moveTo(pa.px, pa.py);
+            ctx.lineTo(pb.px, pb.py);
+            ctx.strokeStyle = `rgba(56,189,248,${strength})`;
+            ctx.lineWidth   = 0.6;
+            ctx.stroke();
+          }
+        }
+      }
+
+      animId = requestAnimationFrame(draw);
+    }
+
+    // Init
+    resize();
+    createParticles();
+    draw();
+
+    // Re-init on resize (debounced)
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        cancelAnimationFrame(animId);
+        resize();
+        createParticles();
+        draw();
+      }, 200);
+    });
+
+    // Subtle mouse parallax — particles drift toward cursor
+    window.addEventListener('mousemove', (e) => {
+      const cx = e.clientX / W - 0.5;
+      const cy = e.clientY / H - 0.5;
+      for (const p of particles) {
+        p.vx += cx * 0.002;
+        p.vy += cy * 0.002;
+        // Speed cap
+        p.vx = Math.max(-0.8, Math.min(0.8, p.vx));
+        p.vy = Math.max(-0.8, Math.min(0.8, p.vy));
+      }
+    }, { passive: true });
+
+  })();
+  </script>
+
 </body>
 </html>
